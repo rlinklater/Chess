@@ -81,17 +81,6 @@ def moves(board, K,R,k,player):
                 for j in range(8):
                         board1[i][j]="-"
                         board2[i][j]="-"
-                        
-        '''
-        # Code Block to read in coordinates from
-        # workfile('testCase.txt')
-
-        coordinates = FileRead(workfile)
-        K = coordinates[0]
-        R = coordinates[1]
-        k = coordinates[2]
-
-        '''
         board1[K[0]][K[1]]="K"
         board1[R[0]][R[1]]="R"
         board1[k[0]][k[1]]="k"
@@ -163,6 +152,18 @@ def play(movmax):
         for i in range(8):
                 for j in range(8):
                         board[i][j]="-"
+        
+        '''
+        # Code Block to read in coordinates from
+        # workfile('testCase.txt')
+
+        coordinates = FileRead(workfile)
+        K = coordinates[0]
+        R = coordinates[1]
+        k = coordinates[2]
+
+        '''
+        
         k=tuple([0,0])
         R=tuple([4,3])
         K=tuple([2,6])
@@ -175,15 +176,19 @@ def play(movmax):
         movnum=movmax
         while draw==False and stalemate==False and checkmate==False and movnum!=0:
                 if player1move:
+                        movnum-=1
                         player1move=False
                 else:
                         board[k[0]][k[1]]="-"
                         if player=="2":
                                 x=k[0]
                                 y=k[1]
-                                while x>=k[0]+2 or x<=k[0]-2 or y<=k[1]-2 or k>=k[1]+2 or x>7 or x<0 or y<0 or y>7 or (x==k[0] and y==k[1]):
+                                possible=moves(board,K,R,k,2)
+                                while possible[x][y]!="O":
                                         x=int(input("Enter king x position:"))
                                         y=int(input("Enter king y position:"))
+                                        if possible[x][y]!="O":
+                                                print("Illegal move")
                                 k=tuple([x,y])
                         else:
                                 k=player2(board,K,R,k)
@@ -192,7 +197,6 @@ def play(movmax):
                 board[K[0]][K[1]]="K"
                 board[k[0]][k[1]]="k"
                 printboard(board)
-                movnum-=1
                 print("Moves =", movmax-movnum) 
         if draw:
                 print("DRAW")
@@ -202,6 +206,7 @@ def play(movmax):
                 print("CHECKMATE")
         elif movnum==0:
                 print("Ran out of moves")
+                
                 
 # For Debugging purposes, check if the user wants to run a test, or actually play the game
 # "Yes" to run the test, "No" to play a normal game.
