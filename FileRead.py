@@ -76,8 +76,8 @@ def FileRead(wf):
 		
 	return Coordinates
 
-
-FileRead(workfile)	
+if Debug:
+	FileRead(workfile)	
 # Tuple:		("x", "r", 1, 3)
 
 
