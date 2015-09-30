@@ -124,10 +124,18 @@ def coord(board):
         return(K,R,k)
 
 def printboard(board):
+        counter=0
         for j in range(8):
+                print(counter, end=" ")
                 for i in range(8):
                         print (board[i][j], end=" ")
                 print()
+                counter+=1
+        counter=0
+        print(" ",end=" ")
+        for i in range(8):
+                print(counter,end=" ")
+                counter+=1
         print()
 def play(movmax):
         movnum=movmax
@@ -167,6 +175,7 @@ def play(movmax):
                 board[k[0]][k[1]]="k"
                 printboard(board)
                 movnum-=1
+                print("Moves =", movmax-movnum) 
         if draw:
                 print("DRAW")
         elif stalemate:
@@ -176,7 +185,7 @@ def play(movmax):
         elif movnum==0:
                 print("Ran out of moves")
                 
-        print("Moves= ", movmax-movnum) 
+        
 while choice !="Y" and choice != "N":
                 choice=input("Is this a test?: ")
                 choice=choice.upper()
