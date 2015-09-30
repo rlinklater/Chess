@@ -1,9 +1,16 @@
+# from FileRead import *
 import copy
-choice=""
-draw=False
-stalemate=False
-checkmate=False
-player="0"
+
+# Variable Declarations
+## General Purpose
+choice = None
+player = "0"
+# workfile = 'testCase.txt'
+## Game State Flags
+draw = False
+stalemate = False
+checkmate = False
+
 def heuristic2(p2):
         hlist=[]
         for i in range(len(p2)):
@@ -185,19 +192,30 @@ def play(movmax):
         elif movnum==0:
                 print("Ran out of moves")
                 
-        
+# For Debugging purposes, check if the user wants to run a test, or actually play the game
+# "Yes" to run the test, "No" to play a normal game.
 while choice !="Y" and choice != "N":
-                choice=input("Is this a test?: ")
-                choice=choice.upper()
-                if choice=="NO":
-                        choice="N"
-                elif choice=="YES":
-                        choice="Y"
-                movmax=int(input("Enter the maximum number of moves: (default is 35) "))
-                if movmax=="":
-                        movmax=35
+        choice=input("Is this a test?(Y/N): ")
+        choice=choice.upper()
+
+        # Play Case       
+        if choice=="NO" or "N":
+                choice="N"
+        # Test Case
+        elif choice=="YES" or "Y":
+                choice="Y"
+
+        # Total number of moves to allow/execute
+        movmax=int(input("Enter the maximum number of moves: (default is 35) "))
+        if movmax=="":
+                movmax=35
+
+
+# Player vs Player Code Block
 while choice=="N" and player!="1" and player!="2":
+        # If this is not a test
         if choice=="N":
+                # User must decide to be whether player 1(Offensive) or player 2(Defensive)
                 player=input("Will you be player (1) or player (2)? ")
-                
+
 play(movmax)
