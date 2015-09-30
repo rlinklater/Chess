@@ -92,6 +92,7 @@ def moves(board, K,R,k,player):
                 rookeMoves(board,board1,board2,K,R,k)
                 oKingMoves(board,board1,board2,K,R,k)
                 printboard(board1)
+                return(board1)
 
 
 
@@ -159,6 +160,34 @@ def play(movmax):
                 if player1move:
                         movnum-=1
                         player1move=False
+                        if player=="1":
+                                piece=input("Are you using the (R)ooke or the (K)ing?:")
+                                piece=piece.upper()
+                                if piece=="R":
+                                        x=R[0]
+                                        y=R[1]
+                                        possible=moves(board,K,R,k,1)
+                                        board[R[0]][R[1]]="-"
+                                        print(possible)
+                                        while possible[x][y]!="X" and possible[x][y]!="Y":
+                                                x=int(input("Enter Rooke x position:"))
+                                                y=int(input("Enter Rooke y position:"))
+                                                if possible[x][y]!="X" and possible[x][y]!="Y":
+                                                        print("Illegal move")
+                                        R=tuple([x,y])
+                                elif piece=="K":
+                                        x=K[0]
+                                        y=K[1]
+                                        possible=moves(board,K,R,k,1)
+                                        board[K[0]][K[1]]="-"
+                                        while possible[x][y]!="Z" and possible[x][y]!="Y":
+                                                x=int(input("Enter King x position:"))
+                                                y=int(input("Enter King y position:"))
+                                                if possible[x][y]!="Z" and possible[x][y]!="Y":
+                                                        print("Illegal move")
+                                        K=tuple([x,y])
+                        else:
+                                print("No AI for player 1")
                 else:
                         board[k[0]][k[1]]="-"
                         if player=="2":
