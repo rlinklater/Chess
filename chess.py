@@ -157,15 +157,19 @@ def play(movmax):
         movnum=movmax
         while draw==False and stalemate==False and checkmate==False and movnum!=0:
                 if player1move:
+                        movnum-=1
                         player1move=False
                 else:
                         board[k[0]][k[1]]="-"
                         if player=="2":
                                 x=k[0]
                                 y=k[1]
-                                while x>=k[0]+2 or x<=k[0]-2 or y<=k[1]-2 or k>=k[1]+2 or x>7 or x<0 or y<0 or y>7 or (x==k[0] and y==k[1]):
+                                possible=moves(board,K,R,k,2)
+                                while possible[x][y]!="O":
                                         x=int(input("Enter king x position:"))
                                         y=int(input("Enter king y position:"))
+                                        if possible[x][y]!="O":
+                                                print("Illegal move")
                                 k=tuple([x,y])
                         else:
                                 k=player2(board,K,R,k)
@@ -174,7 +178,6 @@ def play(movmax):
                 board[K[0]][K[1]]="K"
                 board[k[0]][k[1]]="k"
                 printboard(board)
-                movnum-=1
                 print("Moves =", movmax-movnum) 
         if draw:
                 print("DRAW")
@@ -187,15 +190,15 @@ def play(movmax):
                 
         
 while choice !="Y" and choice != "N":
-                choice=input("Is this a test?: ")
-                choice=choice.upper()
-                if choice=="NO":
-                        choice="N"
-                elif choice=="YES":
-                        choice="Y"
-                movmax=int(input("Enter the maximum number of moves: (default is 35) "))
-                if movmax=="":
-                        movmax=35
+        choice=input("Is this a test?: ")
+        choice=choice.upper()
+        if choice=="NO":
+                choice="N"
+        elif choice=="YES":
+                choice="Y"
+        movmax=int(input("Enter the maximum number of moves: (default is 35) "))
+        if movmax=="":
+                movmax=35
 while choice=="N" and player!="1" and player!="2":
         if choice=="N":
                 player=input("Will you be player (1) or player (2)? ")
