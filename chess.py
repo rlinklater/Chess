@@ -81,6 +81,17 @@ def moves(board, K,R,k,player):
                 for j in range(8):
                         board1[i][j]="-"
                         board2[i][j]="-"
+                        
+        '''
+        # Code Block to read in coordinates from
+        # workfile('testCase.txt')
+
+        coordinates = FileRead(workfile)
+        K = coordinates[0]
+        R = coordinates[1]
+        k = coordinates[2]
+
+        '''
         board1[K[0]][K[1]]="K"
         board1[R[0]][R[1]]="R"
         board1[k[0]][k[1]]="k"
