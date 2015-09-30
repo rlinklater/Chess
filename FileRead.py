@@ -6,20 +6,34 @@
 
 Debug = True
 
-Workfile = "testCase.txt"
+workfile = "testCase.txt"
 
-def FileRead():
+# Helper Function
+# Checks if provided coordinate 
+# falls within a legal chessboard
+# range: 8X8		
+def validCoord(l):
+	if ((int(l[4])	>= 1) and (int(l[4]) <= 8)) and ((int(l[6])	>= 1) and (int(l[6]) <= 8)):
+		return True # Coordinate is valid
+	else:
+		print("Coordinate out of range(1-8)")
+		return False # Coordinate is invalid
+	
+
+def FileRead(wf):
 	Coordinates = []
-	with open(workfile, 'r') as f:
+	with open(wf, 'r') as f:
 		if Debug:
-			print("{} successfully opened".format(Workfile))
+			print("{} successfully opened".format(wf))
 		
 		# Loop to iterate through each line in the provided text file
 		# Assumes lines in the form: p.cp(x,y)		where p is the character
-		# representing the player(x, y), cp is the character representing the
-		# chess piece(K for king, R for rook), and (x,y) are the coordinates 
-		# of the chess piece on the chess board(1-8).
-		for line in f:
+		#		representing the player(x, y), cp is the character representing the
+		#		chess piece(K for king, R for rook), and (x,y) are the coordinates 
+		#		of the chess piece on the chess board(1-8).
+		s = f.read()
+		s2 = s.replace(',', ' ').split()
+		for line in s2:
 			if Debug:
 				print(line)
 			if line[0] == "x":
@@ -32,7 +46,7 @@ def FileRead():
 				elif line[2].upper() == "R":
 					#		PlayerX - Rook Piece
 					if validCoord(line):
-						xR = (line[4], line[6])	# Creates tuple for PlayerX's Rook
+						xR = (line[4], line[6])	#		Creates tuple for PlayerX's Rook
 						Coordinates.append(xR)	
 				else:
 					# Print "Unrecognized piece character"
@@ -62,18 +76,8 @@ def FileRead():
 		
 	return Coordinates
 
-# Helper Function
-# Checks if provided coordinate 
-# falls within a legal chessboard
-# range: 8X8		
-def validCoord(l):
-	if ((int(l[4])	>= 1) and (int(l[4]) <= 8)) and ((int(l[6])	>= 1) and (int(l[6]) <= 8)):
-		return True # Coordinate is valid
-	else:
-		print("Coordinate out of range(1-8)")
-		return False # Coordinate is invalid
-		
-		
+
+FileRead(workfile)	
 # Tuple:		("x", "r", 1, 3)
 
 
