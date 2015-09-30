@@ -155,7 +155,7 @@ def play(movmax):
                         if player=="2":
                                 x=k[0]
                                 y=k[1]
-                                while x>=k[0]+1 or x<=k[0]-1 or x==k[0] or y==k[1] or y<=k[1]-1 or k>=k[1]+1 or x>7 or x<0 or y<0 or y>8:
+                                while x>=k[0]+2 or x<=k[0]-2 or y<=k[1]-2 or k>=k[1]+2 or x>7 or x<0 or y<0 or y>7 or (x==k[0] and y==k[1]):
                                         x=int(input("Enter king x position:"))
                                         y=int(input("Enter king y position:"))
                                 k=tuple([x,y])
