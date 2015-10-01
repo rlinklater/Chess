@@ -8,8 +8,8 @@ def heuristic2(p2):
         hlist=[]
         for i in range(len(p2)):
                 hval=0
-                for j in range(len(p2[1])):
-                        hval+=abs(float(p2[i][j])-3.5)
+                test=p2[i]
+                hval=abs(float(test[0])-3.5)+abs(float(test[1])-3.5)+float(test[2])
                 hlist.append(hval)
         print(p2[hlist.index(min(hlist))])
         return(p2[hlist.index(min(hlist))])
@@ -18,13 +18,17 @@ def player2(board,K,R,k):
         possible=moves(board,K,R,k,2)
         global stalemate
         global checkmate
+        global draw
         if draw:
                 return(R)
         p2=[]
         for j in range(len(board)):
                 for i in range(len(board[j])):
                         if possible[i][j]=="O":
-                                p2.append(tuple([i,j]))
+                                p2.append(tuple([i,j,10]))
+                        elif possible[i][j]=="D":
+                                p2.append(tuple([i,j,0]))
+                                draw=True
         print(p2)
         if p2==[]:
                 stalemate=True
@@ -50,11 +54,14 @@ def rookeMoves(board,board1,board2,K,R,k):
 def oKingMoves(board,board1,board2,K,R,k):
         for i in range(8):
                 for j in range(8):
-                        if (board[i][j]=="-" or board[i][j]=="R") and board2[i][j]!="O" and i<=K[0]+1 and i>=K[0]-1 and j<=K[1]+1 and j>=K[1]-1:
+                        if (board[i][j]=="-" or board[i][j]=="R")  and i<=K[0]+1 and i>=K[0]-1 and j<=K[1]+1 and j>=K[1]-1:
                                 if board1[i][j]=="X":
                                         board1[i][j]="Y"
                                 elif board[i][j]=="R":
+                                        print("Protected")
                                         board2[i][j]="r"
+                                elif board2[i][j]=="O":
+                                        board1[i][j]="s"
                                 else:
                                         board1[i][j]="Z"
 def dKingMoves(board,board1,board2,K,R,k):
@@ -66,7 +73,6 @@ def dKingMoves(board,board1,board2,K,R,k):
                                         board2[i][j]="O"
                                 elif board2[i][j]=="R":
                                         board2[i][j]="D"
-                                        draw=True
 def moves(board, K,R,k,player):
         board1 = [[0 for x in range(8)] for x in range(8)]
         board2 = [[0 for x in range(8)] for x in range(8)]
@@ -168,11 +174,10 @@ def play(movmax):
                                         y=R[1]
                                         possible=moves(board,K,R,k,1)
                                         board[R[0]][R[1]]="-"
-                                        print(possible)
-                                        while possible[x][y]!="X" and possible[x][y]!="Y":
+                                        while possible[x][y]!="X" and possible[x][y]!="Y" and possible[x][y]!="s":
                                                 x=int(input("Enter Rooke x position:"))
                                                 y=int(input("Enter Rooke y position:"))
-                                                if possible[x][y]!="X" and possible[x][y]!="Y":
+                                                if possible[x][y]!="X" and possible[x][y]!="Y"and possible[x][y]!="s":
                                                         print("Illegal move")
                                         R=tuple([x,y])
                                 elif piece=="K":
@@ -201,7 +206,8 @@ def play(movmax):
                                                 print("Illegal move")
                                 k=tuple([x,y])
                         else:
-                                k=player2(board,K,R,k)
+                                kprime=player2(board,K,R,k)
+                                k=tuple([kprime[0],kprime[1]])
                         player1move=True
                 board[R[0]][R[1]]="R"
                 board[K[0]][K[1]]="K"
