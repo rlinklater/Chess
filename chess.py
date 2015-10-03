@@ -11,7 +11,7 @@ def heuristic2(p2):
                 test=p2[i]
                 hval=abs(float(test[0])-3.5)+abs(float(test[1])-3.5)+float(test[2])
                 hlist.append(hval)
-        print(p2[hlist.index(min(hlist))])
+        #print(p2[hlist.index(min(hlist))])
         return(p2[hlist.index(min(hlist))])
 
 def player2(board,K,R,k):
@@ -29,7 +29,7 @@ def player2(board,K,R,k):
                         elif possible[i][j]=="D":
                                 p2.append(tuple([i,j,0]))
                                 draw=True
-        print(p2)
+        #print(p2)
         if p2==[]:
                 stalemate=True
                 if R[0]==k[0] or R[1]==k[1]:
@@ -42,15 +42,57 @@ def player2(board,K,R,k):
 def rookeMoves(board,board1,board2,K,R,k):
         for i in range(8):
                 if board[R[0]][i] =="-" and board2[R[0]][i] !="O":
-                        if board1[R[0]][i]=="Z":
-                                board1[R[0]][i]="Y"
+                        if R[0]==K[0] and R[0]==k[0]:
+                                if abs(R[1]-K[1]) < abs(R[1]-k[1]):
+                                        block=K[1]
+                                if (R[1]>block and i>block) or (R[1]<block and i<block):
+                                        if board1[R[0]][i]=="Z":
+                                                board1[R[0]][i]="Y"
+                                        else:
+                                                board1[R[0]][i]="X"
+                        elif R[0]==K[0]:
+                                if (R[1]>K[1] and i>K[1]) or (R[1]<K[1] and i<K[1]):
+                                        if board1[R[0]][i]=="Z":
+                                                board1[R[0]][i]="Y"
+                                        else:
+                                                board1[R[0]][i]="X"     
+                        elif R[0]==k[0]:
+                                if (R[1]>k[1] and i>k[1]) or (R[1]<k[1] and i<k[1]):
+                                        if board1[R[0]][i]=="Z":
+                                                board1[R[0]][i]="Y"
+                                        else:
+                                                board1[R[0]][i]="X"
                         else:
-                                board1[R[0]][i]="X"            
+                                if board1[R[0]][i]=="Z":
+                                                board1[R[0]][i]="Y"
+                                else:
+                                        board1[R[0]][i]="X" 
                 if board[i][R[1]]=="-" and board2[i][R[1]]!="O":
-                        if board1[i][R[1]]=="Z":
-                                board1[i][R[1]]="Y"
+                        if R[1]==K[1] and R[1]==k[1]:
+                                if abs(R[0]-K[0]) < abs(R[0]-k[0]):
+                                        block=K[0]
+                                if (R[0]>block and i>block) or (R[0]<block and i<block):
+                                        if board1[i][R[1]]=="Z":
+                                                board1[i][R[1]]="Y"
+                                        else:
+                                                board1[i][R[1]]="X"
+                        elif R[1]==K[1]:
+                                if (R[0]>K[0] and i>K[0]) or (R[0]<K[0] and i<K[0]):
+                                        if board1[i][R[1]]=="Z":
+                                                board1[i][R[1]]="Y"
+                                        else:
+                                                board1[i][R[1]]="X"     
+                        elif R[1]==k[1]:
+                                if (R[0]>k[0] and i>k[0]) or (R[0]<k[0] and i<k[0]):
+                                        if board1[i][R[1]]=="Z":
+                                                board1[i][R[1]]="Y"
+                                        else:
+                                                board1[i][R[1]]="X"
                         else:
-                                board1[i][R[1]]="X"
+                                if board1[i][R[1]]=="Z":
+                                                board1[i][R[1]]="Y"
+                                else:
+                                        board1[i][R[1]]="X" 
 def oKingMoves(board,board1,board2,K,R,k):
         for i in range(8):
                 for j in range(8):
@@ -164,7 +206,6 @@ def play(movmax):
         movnum=movmax
         while draw==False and stalemate==False and checkmate==False and movnum!=0:
                 if player1move:
-                        movnum-=1
                         player1move=False
                         if player=="1":
                                 piece=input("Are you using the (R)ooke or the (K)ing?:")
@@ -194,6 +235,7 @@ def play(movmax):
                         else:
                                 print("No AI for player 1")
                 else:
+                        movnum-=1
                         board[k[0]][k[1]]="-"
                         if player=="2":
                                 x=k[0]
