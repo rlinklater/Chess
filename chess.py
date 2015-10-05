@@ -4,42 +4,37 @@ draw=False
 stalemate=False
 checkmate=False
 player="0"
-def heuristic2(p2):
-        hlist=[]
-        for i in range(len(p2)):
-                hval=0
-                test=p2[i]
-                hval=abs(float(test[0])-3.5)+abs(float(test[1])-3.5)+float(test[2])
-                hlist.append(hval)
-        #print(p2[hlist.index(min(hlist))])
-        return(p2[hlist.index(min(hlist))])
 
+#determines heuristic value for player 2
+def heuristic2(test):
+        hval=abs(float(test[0])-3.5)+abs(float(test[1])-3.5)+float(test[2])
+        return(hval)
+
+#automated player 2 move
 def player2(board,K,R,k):
         possible=moves(board,K,R,k,2)
         global stalemate
         global checkmate
         global draw
+        #if it is a draw king takes Rook
         if draw:
                 return(R)
-        p2=[]
-        for j in range(len(board)):
-                for i in range(len(board[j])):
-                        if possible[i][j]=="O":
-                                p2.append(tuple([i,j,10]))
-                        elif possible[i][j]=="D":
-                                p2.append(tuple([i,j,0]))
-                                draw=True
-        #print(p2)
-        if p2==[]:
+        #check if a checkmate or stalemate has occurred
+        if possible==[]:
                 stalemate=True
                 if R[0]==k[0] or R[1]==k[1]:
                         checkmate=True
                         stalemate=False
                 return k
-        return(heuristic2(p2))
 
+        p2=[]
+        #create a tuple with x and y coordinates of player 2 with their heuristic value
+        for i in possible:
+                p2.append(tuple([i[0],i[1],heuristic2(i)]))
+        return(p2)
 
-def rookeMoves(board,board1,board2,K,R,k):
+#defines possible rook moves
+def rookMoves(board,board1,board2,K,R,k):
         for i in range(8):
                 if board[R[0]][i] =="-" and board2[R[0]][i] !="O":
                         if R[0]==K[0] and R[0]==k[0]:
@@ -93,6 +88,7 @@ def rookeMoves(board,board1,board2,K,R,k):
                                                 board1[i][R[1]]="Y"
                                 else:
                                         board1[i][R[1]]="X" 
+#defines possible moves for the offensive king
 def oKingMoves(board,board1,board2,K,R,k):
         for i in range(8):
                 for j in range(8):
@@ -100,12 +96,13 @@ def oKingMoves(board,board1,board2,K,R,k):
                                 if board1[i][j]=="X":
                                         board1[i][j]="Y"
                                 elif board[i][j]=="R":
-                                        print("Protected")
+                                        #print("Protected")
                                         board2[i][j]="r"
                                 elif board2[i][j]=="O":
                                         board1[i][j]="s"
                                 else:
                                         board1[i][j]="Z"
+#defines moves for the defensive king
 def dKingMoves(board,board1,board2,K,R,k):
         global draw
         for i in range(8):
@@ -115,6 +112,7 @@ def dKingMoves(board,board1,board2,K,R,k):
                                         board2[i][j]="O"
                                 elif board2[i][j]=="R":
                                         board2[i][j]="D"
+#finds possible moves using rookMoves,oKingMoves,dKingMoves, and possible moves
 def moves(board, K,R,k,player):
         board1 = [[0 for x in range(8)] for x in range(8)]
         board2 = [[0 for x in range(8)] for x in range(8)]
@@ -130,29 +128,49 @@ def moves(board, K,R,k,player):
         board2[k[0]][k[1]]="k"
 
         if player==2:
-                rookeMoves(board,board1,board2,K,R,k)
+                #creates a board of possible moves for player 2
+                rookMoves(board,board1,board2,K,R,k)
                 oKingMoves(board,board1,board2,K,R,k)
                 dKingMoves(board,board1,board2,K,R,k)
-                printboard(board2)
-                return(board2)
+                #printboard(board2)
+                return possiblemoves(board2,"2")
+                #return(board2)
         elif player==1:
+                #creates a board of possible moves for player 1
                 dKingMoves(board,board1,board2,K,R,k)
-                rookeMoves(board,board1,board2,K,R,k)
+                rookMoves(board,board1,board2,K,R,k)
                 oKingMoves(board,board1,board2,K,R,k)
-                printboard(board1)
-                return(board1)
+                #printboard(board1)
+                return possiblemoves(board1,"1")
+                #return(board1)
 
-
-
-        #for Rooke
-        rookeMoves(board,board1,board2,K,R,k)
-        #for King
-        oKingMoves(board,board1,board2,K,R,k)
-        #for king
-        dKingMoves(board,board1,board2,K,R,k)
-                
-#    printboard(board1)
-#    printboard(board2)
+#takes a board of possible moves and returns a list of tuples of possible moves
+def possiblemoves(board,c):
+        #possible moves for player 2 (x,y,whether or not you can take the rook)
+        if c == "2":
+                p2=[]
+                for j in range(len(board)):
+                        for i in range(len(board[j])):
+                                if board[i][j]=="O":
+                                        p2.append(tuple([i,j,10]))
+                                elif board[i][j]=="D":
+                                        p2.append(tuple([i,j,0]))
+                                        draw=True
+                return p2
+        #possible moves for player 1 (x,y, piece that made the move)
+        elif c == "1":
+                p1=[]
+                for j in range(len(board)):
+                        for i in range(len(board[j])):
+                                if board[i][j]=="X" or board[i][j]=="s":
+                                        p1.append(tuple([i,j,"R"]))
+                                elif board[i][j]=="Z":
+                                        p1.append(tuple([i,j,"K"]))
+                                elif board[i][j]=="Y":
+                                        p1.append(tuple([i,j,"R"]))
+                                        p1.append(tuple([i,j,"K"]))
+                return p1
+#finds the coordinates of the pieces given the board
 def coord(board):
         for i in range(len(board)):
                 try:
@@ -169,9 +187,9 @@ def coord(board):
                         k=tuple([i,board[i].index("k")])
                 except ValueError:
                         continue
-        print(K,R,k)
+        #print(K,R,k)
         return(K,R,k)
-
+#prints out the board given the board
 def printboard(board):
         counter=0
         for j in range(8):
@@ -186,14 +204,22 @@ def printboard(board):
                 print(counter,end=" ")
                 counter+=1
         print()
+#body of the program, makes sure that you may not go past the allowed amount of moves
+#also checks for draw, stalemate, and checkmate
 def play(movmax):
         movnum=movmax
         global player
+        global stalemate
+        global checkmate
+        global draw
+        #to switch between player 1 and player 2
         player1move=True
+        #creates the board
         board = [[0 for x in range(8)] for x in range(8)] 
         for i in range(8):
                 for j in range(8):
                         board[i][j]="-"
+        #places the pieces on the board
         k=tuple([0,0])
         R=tuple([4,3])
         K=tuple([2,6])
@@ -201,61 +227,100 @@ def play(movmax):
         board[R[0]][R[1]]="R"
         board[K[0]][K[1]]="K"
 
-        K,R,k=coord(board)
+        #K,R,k=coord(board)
         printboard(board)
         movnum=movmax
         while draw==False and stalemate==False and checkmate==False and movnum!=0:
                 if player1move:
+                        #makes sure player 2 goes next
                         player1move=False
+                        #if player 1 is the human (or other program) input
                         if player=="1":
                                 piece=input("Are you using the (R)ooke or the (K)ing?:")
                                 piece=piece.upper()
+                                #takes care of rook moves
                                 if piece=="R":
                                         x=R[0]
                                         y=R[1]
                                         possible=moves(board,K,R,k,1)
                                         board[R[0]][R[1]]="-"
-                                        while possible[x][y]!="X" and possible[x][y]!="Y" and possible[x][y]!="s":
+                                        illegal=True
+                                        while illegal:
                                                 x=int(input("Enter Rooke x position:"))
                                                 y=int(input("Enter Rooke y position:"))
-                                                if possible[x][y]!="X" and possible[x][y]!="Y"and possible[x][y]!="s":
-                                                        print("Illegal move")
+                                                for i in possible:
+                                                        if i[2]=="R":
+                                                                if i[0]== x and i[1]==y:
+                                                                        illegal=False
+
                                         R=tuple([x,y])
+                                #takes care of king moves
                                 elif piece=="K":
                                         x=K[0]
                                         y=K[1]
                                         possible=moves(board,K,R,k,1)
                                         board[K[0]][K[1]]="-"
-                                        while possible[x][y]!="Z" and possible[x][y]!="Y":
+                                        illegal=True
+                                        while illegal:
                                                 x=int(input("Enter King x position:"))
                                                 y=int(input("Enter King y position:"))
-                                                if possible[x][y]!="Z" and possible[x][y]!="Y":
-                                                        print("Illegal move")
+                                                for i in possible:
+                                                        if i[2]=="K":
+                                                                if i[0]== x and i[1]==y:
+                                                                        illegal=False
+
                                         K=tuple([x,y])
                         else:
+                                #where the AI for player 1 goes
                                 print("No AI for player 1")
+                        #checks for stalemates or checkmates
+                        if moves(board,K,R,k,2) == []:
+                                stalemate=True
+                                if k[0]==R[0] or k[1]==R[1]:
+                                        stalemate=False
+                                        checkmate=True
                 else:
+                        #decrements number of moves left
                         movnum-=1
+                        #eliminates k from the board till it gets replaced
                         board[k[0]][k[1]]="-"
                         if player=="2":
+                                #does validation for player 2 human input
                                 x=k[0]
                                 y=k[1]
                                 possible=moves(board,K,R,k,2)
-                                while possible[x][y]!="O":
+                                illegal=True
+                                while illegal:
                                         x=int(input("Enter king x position:"))
                                         y=int(input("Enter king y position:"))
-                                        if possible[x][y]!="O":
-                                                print("Illegal move")
+                                        for i in possible:
+                                                if i[0]== x and i[1]==y:
+                                                        illegal=False
+
                                 k=tuple([x,y])
                         else:
-                                kprime=player2(board,K,R,k)
+                                #player 2 AI
+                                p2=player2(board,K,R,k)
+                                print(draw,stalemate,checkmate)
+                                H=1000
+                                for i in p2:
+                                        if H> i[2]:
+                                                H=i[2]
+                                                kprime=i
                                 k=tuple([kprime[0],kprime[1]])
+                        #makes sure that player 1 goes next
                         player1move=True
+                        if k==R:
+                                draw=True
+                #makes sure that the pieces are on the board
                 board[R[0]][R[1]]="R"
                 board[K[0]][K[1]]="K"
                 board[k[0]][k[1]]="k"
+                #prints the board after the move
                 printboard(board)
+                #prints number of moves
                 print("Moves =", movmax-movnum) 
+        #prints out the result of the game
         if draw:
                 print("DRAW")
         elif stalemate:
@@ -265,19 +330,22 @@ def play(movmax):
         elif movnum==0:
                 print("Ran out of moves")
                 
-        
+#gets initial input from the user 
 while choice !="Y" and choice != "N":
+        #decides if there will be human input
         choice=input("Is this a test?: ")
         choice=choice.upper()
         if choice=="NO":
                 choice="N"
         elif choice=="YES":
                 choice="Y"
+        #gets the max number of moves in the game
         movmax=int(input("Enter the maximum number of moves: (default is 35) "))
         if movmax=="":
                 movmax=35
+#gets who the human will be playing as
 while choice=="N" and player!="1" and player!="2":
         if choice=="N":
                 player=input("Will you be player (1) or player (2)? ")
-                
+#starts the main program
 play(movmax)
