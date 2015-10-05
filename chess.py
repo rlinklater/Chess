@@ -113,7 +113,8 @@ def dKingMoves(board,board1,board2,K,R,k):
                                 elif board2[i][j]=="R":
                                         board2[i][j]="D"
 #finds possible moves using rookMoves,oKingMoves,dKingMoves, and possible moves
-def moves(board, K,R,k,player):
+def moves(board, K,R,k,turn):
+        global player
         board1 = [[0 for x in range(8)] for x in range(8)]
         board2 = [[0 for x in range(8)] for x in range(8)]
         for i in range(8):
@@ -127,7 +128,7 @@ def moves(board, K,R,k,player):
         board2[R[0]][R[1]]="R"
         board2[k[0]][k[1]]="k"
 
-        if player==2:
+        if turn==2:
                 #creates a board of possible moves for player 2
                 rookMoves(board,board1,board2,K,R,k)
                 oKingMoves(board,board1,board2,K,R,k)
@@ -135,9 +136,10 @@ def moves(board, K,R,k,player):
                 #printboard(board2)
                 return possiblemoves(board2,"2")
                 #return(board2)
-        elif player==1:
+        elif turn==1:
                 #creates a board of possible moves for player 1
-                dKingMoves(board,board1,board2,K,R,k)
+                if player != "1":
+                        dKingMoves(board,board1,board2,K,R,k)
                 rookMoves(board,board1,board2,K,R,k)
                 oKingMoves(board,board1,board2,K,R,k)
                 #printboard(board1)
@@ -236,8 +238,14 @@ def play(movmax):
                         player1move=False
                         #if player 1 is the human (or other program) input
                         if player=="1":
-                                piece=input("Are you using the (R)ooke or the (K)ing?:")
-                                piece=piece.upper()
+                                piece=""
+                                while piece != "R" and piece != "K":
+                                        piece=input("Are you using the (R)ook or the (K)ing?:")
+                                        piece=piece.upper()
+                                        if piece == "ROOK":
+                                                piece="R"
+                                        elif piece == "KING":
+                                                piece="K"
                                 #takes care of rook moves
                                 if piece=="R":
                                         x=R[0]
@@ -301,7 +309,6 @@ def play(movmax):
                         else:
                                 #player 2 AI
                                 p2=player2(board,K,R,k)
-                                print(draw,stalemate,checkmate)
                                 H=1000
                                 for i in p2:
                                         if H> i[2]:
@@ -340,8 +347,10 @@ while choice !="Y" and choice != "N":
         elif choice=="YES":
                 choice="Y"
         #gets the max number of moves in the game
-        movmax=int(input("Enter the maximum number of moves: (default is 35) "))
-        if movmax=="":
+        try:
+                movmax=int(input("Enter the maximum number of moves: (default is 35) "))
+        except:
+                print("No number entered, default of 35 will be used")
                 movmax=35
 #gets who the human will be playing as
 while choice=="N" and player!="1" and player!="2":
