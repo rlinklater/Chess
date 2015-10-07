@@ -7,6 +7,24 @@ stalemate=False
 checkmate=False
 player="0"
 text=open("gameResult.txt","w")
+def FileRead():
+        testCase = "TestCase1: "
+        with open("testCase.txt", 'r') as f:
+                
+                for line in f:
+                        if line[0] == "x":
+                                # PlayerX piece coordinate
+                                # PlayerX - King Piece
+                                xK = tuple([int(line[4])-1, int(line[6])-1]) # Creates tuple for PlayerX's King
+                                        #               PlayerX - Rook Piece
+                                xR = tuple([int(line[14])-1, int(line[16])-1]) #               Creates tuple for PlayerX's Rook   
+                                # PlayerY - King Piece
+                                yK = tuple([int(line[24])-1, int(line[26])-1]) #       Creates tuple for PlayerY's King
+                        else:
+                                # Print "Coordinate format unrecognized"
+                                pass
+                
+        return xK,xR,yK, testCase
 #determines heuristic value for player 2
 def heuristic2(test):
         hval=abs(float(test[0])-3.5)+abs(float(test[1])-3.5)+float(test[2])
@@ -240,9 +258,8 @@ def play(movmax):
         
         
         #creates the coordinates for the board
-        k=tuple([0,0])
-        R=tuple([4,3])
-        K=tuple([2,6])
+        K,R,k,line=FileRead()
+
         #builds the board
         board=createboard(K,R,k)
 
