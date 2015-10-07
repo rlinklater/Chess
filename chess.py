@@ -1,10 +1,12 @@
 import copy
+import sys
+from OffenseTest import *
 choice=""
 draw=False
 stalemate=False
 checkmate=False
 player="0"
-
+text=open("gameResult.txt","w")
 #determines heuristic value for player 2
 def heuristic2(test):
         hval=abs(float(test[0])-3.5)+abs(float(test[1])-3.5)+float(test[2])
@@ -18,6 +20,7 @@ def player2(board,K,R,k):
         global draw
         #if it is a draw king takes Rook
         if draw:
+                print("HELLO")
                 return(R)
         #check if a checkmate or stalemate has occurred
         if possible==[]:
@@ -115,18 +118,8 @@ def dKingMoves(board,board1,board2,K,R,k):
 #finds possible moves using rookMoves,oKingMoves,dKingMoves, and possible moves
 def moves(board, K,R,k,turn):
         global player
-        board1 = [[0 for x in range(8)] for x in range(8)]
-        board2 = [[0 for x in range(8)] for x in range(8)]
-        for i in range(8):
-                for j in range(8):
-                        board1[i][j]="-"
-                        board2[i][j]="-"
-        board1[K[0]][K[1]]="K"
-        board1[R[0]][R[1]]="R"
-        board1[k[0]][k[1]]="k"
-        board2[K[0]][K[1]]="K"
-        board2[R[0]][R[1]]="R"
-        board2[k[0]][k[1]]="k"
+        board1 = createboard(K,R,k)
+        board2 = createboard(K,R,k)
 
         if turn==2:
                 #creates a board of possible moves for player 2
@@ -192,7 +185,18 @@ def coord(board):
         #print(K,R,k)
         return(K,R,k)
 #prints out the board given the board
+def createboard(K,R,k):
+        board = [[0 for x in range(8)] for x in range(8)] 
+        for i in range(8):
+                for j in range(8):
+                        board[i][j]="-"
+        board[k[0]][k[1]]="k"
+        board[R[0]][R[1]]="R"
+        board[K[0]][K[1]]="K"
+        return board
 def printboard(board):
+        terminal=sys.stdout
+        print("Board=>")
         counter=0
         for j in range(8):
                 print(counter, end=" ")
@@ -206,6 +210,22 @@ def printboard(board):
                 print(counter,end=" ")
                 counter+=1
         print()
+        sys.stdout=text
+        print("Board=>")
+        counter=0
+        for j in range(8):
+                print(counter, end=" ")
+                for i in range(8):
+                        print (board[i][j], end=" ")
+                print()
+                counter+=1
+        counter=0
+        print(" ",end=" ")
+        for i in range(8):
+                print(counter,end=" ")
+                counter+=1
+        print()
+        sys.stdout=terminal
 #body of the program, makes sure that you may not go past the allowed amount of moves
 #also checks for draw, stalemate, and checkmate
 def play(movmax):
@@ -214,21 +234,37 @@ def play(movmax):
         global stalemate
         global checkmate
         global draw
+        global text
         #to switch between player 1 and player 2
         player1move=True
-        #creates the board
-        board = [[0 for x in range(8)] for x in range(8)] 
-        for i in range(8):
-                for j in range(8):
-                        board[i][j]="-"
-        #places the pieces on the board
+        
+        
+        #creates the coordinates for the board
         k=tuple([0,0])
         R=tuple([4,3])
         K=tuple([2,6])
-        board[k[0]][k[1]]="k"
-        board[R[0]][R[1]]="R"
-        board[K[0]][K[1]]="K"
+        #builds the board
+        board=createboard(K,R,k)
 
+
+        #calling offenseive class
+        player1=Offense(K,R,k)
+
+        terminal=sys.stdout
+        print("================================")
+        print("Game started.....")  
+        if player=="0":
+                print("Test case",end=" ") 
+        print("x.K",K," x.R", R, " y.K", k)
+        print("================================")
+        sys.stdout=text
+        print("================================")
+        print("Game started.....")  
+        if player=="0":
+                print("Test case",end=" ") 
+        print("x.K",K," x.R", R, " y.K", k)
+        print("================================")
+        sys.stdout=terminal
         #K,R,k=coord(board)
         printboard(board)
         movnum=movmax
@@ -280,6 +316,7 @@ def play(movmax):
                                         K=tuple([x,y])
                         else:
                                 #where the AI for player 1 goes
+                                #min_max_p1(board,K,R,k)
                                 print("No AI for player 1")
                         #checks for stalemates or checkmates
                         if moves(board,K,R,k,2) == []:
@@ -308,6 +345,7 @@ def play(movmax):
                                 k=tuple([x,y])
                         else:
                                 #player 2 AI
+                                #kprime=min_max_p2(board,K,R,k)
                                 p2=player2(board,K,R,k)
                                 H=1000
                                 for i in p2:
@@ -319,23 +357,35 @@ def play(movmax):
                         player1move=True
                         if k==R:
                                 draw=True
+                        print("Moves =", movmax-movnum)
                 #makes sure that the pieces are on the board
                 board[R[0]][R[1]]="R"
                 board[K[0]][K[1]]="K"
                 board[k[0]][k[1]]="k"
+                player1.setKingCoord(K)
+                player1.setRookCoord(R)
+                player1.setOpp_KingCoord(k)
                 #prints the board after the move
                 printboard(board)
+
                 #prints number of moves
-                print("Moves =", movmax-movnum) 
+                 
         #prints out the result of the game
-        if draw:
-                print("DRAW")
-        elif stalemate:
+
+        if stalemate or draw:
                 print("STALEMATE")
         elif checkmate:
                 print("CHECKMATE")
         elif movnum==0:
                 print("Ran out of moves")
+        sys.stdout=text
+        if stalemate or draw:
+                print("STALEMATE")
+        elif checkmate:
+                print("CHECKMATE")
+        elif movnum==0:
+                print("Ran out of moves")
+        sys.stdout=terminal
                 
 #gets initial input from the user 
 while choice !="Y" and choice != "N":
