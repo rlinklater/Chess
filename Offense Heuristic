@@ -1,0 +1,486 @@
+from math import *
+ 
+ 
+#####################################################
+# Function that returns possible moves for a given  #
+# piece p at a given coordinate c, regardless of    #
+# whether or not those possible moves are safe.     #
+#####################################################
+def posMoves(p, c):
+    moves = []
+    # Piece is a King
+    if p == 'K':
+        # Will find all moves for a king provided (x,y) coordinate is valid
+        for x in range(c[0] - 1, c[0] + 2):
+            for y in range(c[1] - 1, c[1] + 2):
+                if validCoord((x,y), debug):
+                    moves.append((x,y))
+        return moves
+    # Piece is a Rook
+    elif p == 'R':
+        # Will find all moves for a rook provided (x,y) coordinate is valid
+        for x in range(0,8):
+            if validCoord((x, c[1]), debug):
+                moves.append((x, c[1]))
+        for y in range(0,8):
+            if validCoord((c[0], y), debug):
+                moves.append((c[0], y))
+        return moves
+    else:
+        print('argument p not recognized("K" or "R")')
+        pass
+ 
+ 
+######################################################
+# Function that returns a boolean value, depending   #
+# on whether a given coordinate c, is valid, that is #
+# the coordinate is valid on a chess board.          #
+# (0 <= x <= 7, 0 <= y <= 7)                         #
+######################################################
+def validCoord(c, debug):
+    if debug:
+        print('Coordinate: {}'.format(c))
+    validX = False
+    validY = False
+    if (c[0] >= 0) and (c[0] <= 7):
+        if debug:
+            print('X-coord: Valid')
+        validX = True
+    if (c[1] >= 0) and (c[1] <= 7):
+        if debug:
+            print('Y-coord: Valid')
+        validY = True
+         
+    if validX and validY:
+        return True
+    else:
+        print('Coordinate {} Invalid.'.format(c))
+        if not validX:
+            print('\tX-coord: Invalid')
+        if not validY:
+            print('\tY-coord: Invalid ')
+         
+        return False
+ 
+##########################################
+# Check to see if Rook is within Ally King's reach
+# If so, set rookProtected = True, and set objective1Complete = True
+##########################################
+def checkObjective1(Offense):
+    if Offense.kingSafe and Offense.rookProtected:
+        return True
+    else:
+        return False
+ 
+##########################################
+# Function that returns the distance between two points(Coordinates)
+##########################################
+def distance(c1, c2):
+    return sqrt((c1[0] - c2[0]) ** 2 + (c1[1] - c2[1]) ** 2)
+ 
+##########################################
+# Function that returns a list of coordinates that the offense's king
+# should not be in, in order to guarantee the area-reduction strategy's
+# effectiveness.
+##########################################
+def dumbMoves(Rook, King, Quadrant):
+    rookMoves = posMoves('R', Rook)
+    badMoves = []
+    if Quadrant == 'tr':
+        for move in rookMoves:
+            if move[0] > Rook[0] and move[1] == Rook[1]:
+                badMoves.append(move)
+            elif move[1] > Rook[1] and move[0] == Rook[0]:
+                badMoves.append(move)
+        return badMoves
+    if Quadrant == 'br':
+        for move in rookMoves:
+            if move[0] > Rook[0] and move[1] == Rook[1]:
+                badMoves.append(move)
+            elif move[1] < Rook[1] and move[0] == Rook[0]:
+                badMoves.append(move)
+        return badMoves
+    if Quadrant == 'tl':
+        for move in rookMoves:
+            if move[0] < Rook[0] and move[1] == Rook[1]:
+                badMoves.append(move)
+            elif move[1] > Rook[1] and move[0] == Rook[0]:
+                badMoves.append(move)
+        return badMoves
+    if Quadrant == 'bl':
+        for move in rookMoves:
+            if move[0] < Rook[0] and move[1] == Rook[1]:
+                badMoves.append(move)
+            elif move[1] < Rook[1] and move[0] == Rook[0]:
+                badMoves.append(move)
+        return badMoves
+    else:
+        print('Quadrant Unrecognized')                                              
+ 
+ 
+###############################################
+# Function that returns a character string representing the quadrant the enemy
+# king is in.
+#   - 'tr' = Top Right
+#   - 'br' = Bottom Right
+#   - 'tl' = Top Left
+#   - 'bl' = Bottom Left
+###############################################
+def oppQuadrant_Obj2(p1, p2):
+    if p2[0] > p1[0] and p2[1] > p1[1]:
+        #print('Top Right')
+        return 'tr'
+    elif p2[0] > p1[0] and p2[1] < p1[1]:
+        #print('Bottom Right')
+        return 'br'
+    elif p2[0] < p1[0] and p2[1] > p1[1]:
+        #print('Top Left')
+        return 'tl'
+    elif p2[0] < p1[0] and p2[1] < p1[1]:
+        #print('Bottom Left')
+        return 'bl'
+ 
+###############################################
+# Function used to check if two kings are in opposition
+###############################################
+def opposition(K1, K2):
+    k1Moves = posMoves('K', K1)
+    k2Moves = posMoves('K', K2)
+ 
+    for move1 in k1Moves:
+        for move2 in k2Moves:
+            if move1 == move2 and K1[0] == K2[0]:
+                print('Opposition')
+                return True
+            elif move1 == move2 and K1[1] == K2[1]:
+                print('Opposition')
+                return True
+    return False
+ 
+ 
+ 
+ 
+#############################################################################################
+#############################################################################################
+ 
+class Offense:
+    ############################################################
+    # Initializes the Coordinates of Player 1's King and Rook, aswell as Player2's King.                            #
+    # Default Coordinates are that of general starting positions.                                                                 #
+    ############################################################
+    def __init__(self, King = (3,7), Rook = (7,7), Opponent_King = (4,0), debugFlag = False):
+        self.king = King
+        self.rook = Rook
+        self.op_king = Opponent_King
+ 
+        #################################
+        # Flags for Heurisitic Function #
+        #################################
+        self.kingSafe = None
+        self.rookSafe = None
+        self.rookProtected = None
+        self.opposition = None
+        # Default None until flags are  #
+        # set by checker function       #
+        #################################
+ 
+        #################################
+        # Flags for AI Current state #
+        #################################
+        # Objective 1: King and Rook Rendevous
+        # Objective 2: Reduce Opponent King's area of movement
+        # Objective 3: Move in for the checkmate
+        self.objective1Complete = None
+        self.objective2Complete = None
+        self.objective3Complete = None
+ 
+ 
+        #################################
+        # Flags for Debug #
+        #################################
+        self.debug = debugFlag
+ 
+    ###############################################
+    # Getter Functions for game piece coordinates #
+    ###############################################
+    ##  Player 1  ##
+    def getKingCoord(self):
+        return self.king    
+    def getRookCoord(self):
+        return self.rook
+    ##  Player 2  ##
+    def getOpp_KingCoord(self):
+        return self.op_king
+    ###############################################
+    # Setter Functions for game piece coordinates #
+    ###############################################
+    ##  Player 1  ##
+    def setKingCoord(self, newKC):
+        if validCoord(newKC, self.debug):
+            self.king = newKC
+    def setRookCoord(self, newRC):
+        if validCoord(newRC, self.debug):
+            self.rook = newRC
+    ##  Player 2  ##
+    def setOpp_KingCoord(self, newOp_KC):
+        if validCoord(newOp_KC, self.debug):
+            self.op_king = newOp_KC
+ 
+#######################################################
+    ################################################
+    # Miscellaneous Methods for getting currents   #
+    # Flags, and setting the debug flag.           #
+    ################################################
+#######################################################
+ 
+    ##################################################
+    # Method for setting the Debug flag, in order to print out what's going on behind the
+    # scenes. d is a boolean.
+    ##################################################
+    def setDebug(self, d):
+        if d:
+            self.debug = True
+        elif not d:
+            self.debug = False
+        else:
+            print('Debug flag not recognized')
+ 
+    ################################################
+    # Method for printing the current status of the Offense flags.
+    #################################################
+    def getFlags(self):
+        print('Current Flag Status')
+        print('\tKing Safe: {}\n\tRook Safe: {}\n\tRook Protected: {}\n\tOpposition: {}'.format(self.kingSafe, self.rookSafe, self.rookProtected, self.opposition))
+ 
+ 
+    def checkFlags(self, p1K, p1R, p2K):
+        print('\tChecking Flags')
+ 
+        safeZone = posMoves('K', p1K)
+        unsafeZone = posMoves('K', p2K)
+ 
+        print('SafeZone: {}'.format(safeZone))
+        print('UnsafeZone: {}'.format(unsafeZone))
+ 
+        if p1K in unsafeZone:
+            print('Player 1 King Unsafe')
+            self.kingSafe = False
+        else:
+            print('Player1 King Safe')
+            self.kingSafe = True
+ 
+        if p1R in unsafeZone and p1R not in safeZone:
+            print('Player1 Rook Unsafe')
+            self.rookSafe = False
+        elif p1R in unsafeZone and p1R in safeZone:
+            print('Player1 Rook protected by Player1 King in Player2 King range')
+            self.rookSafe = True
+            self.rookProtected = True
+        elif p1R not in unsafeZone and p1R in safeZone:
+            print('Player1 Rook protected by Player1 King outside enemy king range')
+            self.rookSafe = True
+            self.rookProtected = True
+        elif p1R not in unsafeZone and p1R not in safeZone:
+            print('Player1 Rook Safe')
+            self.rookSafe = True
+        else:
+            print("Not sure of Rook's safety")
+ 
+ 
+    def coveredArea_Obj2(self, p1R, p1K, p2K):
+        # Top Right Quadrant
+        if oppQuadrant_Obj2(p1R, p2K) == 'tr':
+            if p1K in dumbMoves(p1R, p1K, 'tr'):
+                # Check if base or height of Opponent King's square area is equal to 2
+                test_h = 8 - (p1R[1] + 1)
+                test_b = 8 - (p1R[0] + 1)
+                if  test_h ==2 or test_b == 2:
+                    h = 8 - (p1R[1] + 1)
+                    b = 8 - (p1R[0] + 1)
+                    enemyArea = b * h
+                    print(enemyArea)
+                    coveredArea = 64 - enemyArea
+                    return coveredArea
+                else:                   
+                    print('King is dumb')
+                    return 0
+            else:
+                #Calculate Area between rook's possible moves in top right quadrant
+                h = 8 - (p1R[1] + 1)
+                b = 8 - (p1R[0] + 1)
+                enemyArea = b * h
+                print(enemyArea)
+                coveredArea = 64 - enemyArea
+                return coveredArea
+        # Bottom Right Quadrant
+        elif oppQuadrant_Obj2(p1R, p2K) == 'br':
+            if p1K in dumbMoves(p1R, p1K, 'br'):
+                # Check if base or height of Opponent King's square area is equal to 2
+                test_h = p1R[1] 
+                test_b = 8 - (p1R[0] + 1)
+                if  test_h ==2 or test_b == 2:
+                    h = p1R[1] 
+                    b = 8 - (p1R[0] + 1)
+                    enemyArea = b * h
+                    print(enemyArea)
+                    coveredArea = 64 - enemyArea
+                    return coveredArea
+                else:                   
+                    print('King is dumb')
+                    return 0
+            else:
+                #Calculate Area between rook's possible moves in bottom right quadrant
+                h = p1R[1] 
+                b = 8 - (p1R[0] + 1)
+                enemyArea = b * h
+                print(enemyArea)
+                coveredArea = 64 - enemyArea
+                return coveredArea
+        # Top Left Quadrant
+        elif oppQuadrant_Obj2(p1R, p2K) == 'tl':
+            if p1K in dumbMoves(p1R, p1K, 'tl'):
+                # Check if base or height of Opponent King's square area is equal to 2
+                test_h =8 - (p1R[1] + 1)
+                test_b = p1R[0] 
+                if  test_h ==2 or test_b == 2:
+                    h = 8 - (p1R[1] + 1)
+                    b = p1R[0] 
+                    enemyArea = b * h
+                    print(enemyArea)
+                    coveredArea = 64 - enemyArea
+                    return coveredArea
+                else:                   
+                    print('King is dumb')
+                    return 0
+            else:
+                #Calculate Area between rook's possible moves in top left quadrant
+                h = 8 - (p1R[1] + 1)
+                b = p1R[0] 
+                enemyArea = b * h
+                print(enemyArea)
+                coveredArea = 64 - enemyArea
+                return coveredArea
+        # Bottom Left Quadrant
+        elif oppQuadrant_Obj2(p1R, p2K) == 'bl':
+            if p1K in dumbMoves(p1R, p1K, 'br'):
+                # Check if base or height of Opponent King's square area is equal to 2
+                test_h = p1R[1]
+                test_b = p1R[0]
+                if  test_h ==2 or test_b == 2:
+                    h = p1R[1]
+                    b = p1R[0]
+                    enemyArea = b * h
+                    print(enemyArea)
+                    coveredArea = 64 - enemyArea
+                    return coveredArea
+                else:                   
+                    print('King is dumb')
+                    return 0
+            else:
+                #Calculate Area between rook's possible moves in bottom left quadrant
+                h = p1R[1]
+                b = p1R[0]
+                enemyArea = b * h
+                print(enemyArea)
+                coveredArea = 64 - enemyArea
+                return coveredArea
+        else:
+            print('Quadrant unrecognized')
+ 
+ 
+    def heuristic(self, p1K, p1R, p2K):
+        if not validCoord(p1K, self.debug) or not validCoord(p1R, self.debug) or not validCoord(p2K, self.debug):
+            print('One or more coordinates are invalid\nTry Again')
+            return 0
+ 
+        print('Running Heuristic')
+        # Will Check Flag Status for Current Coordinates
+        self.checkFlags(p1K, p1R, p2K)
+ 
+        if checkObjective1(self):
+            print('Objective 1: Complete')
+            self.objective1Complete = True
+        else :
+            print('Objective 1: Incomplete')
+            self.rookProtected = False
+            self.objective1Complete = False
+ 
+        ##########################################
+        # Checks to see if Objective 1 has been complete. Objective 1 is Player
+        # 1's king and rook being together, both safe.
+        ##########################################
+        if not self.objective1Complete:
+ 
+            # Returns greater number if position is closer to ally
+            distToAlly = 8 - distance(p1K, p1R)
+ 
+            # Returns lower number if enemy close
+            distToOpp = distance(p2K, p1K) + distance(p2K, p1R)
+ 
+            # Returns Heuristic value for positions 1 and 2
+            hValue = distToAlly + distToOpp
+ 
+            # Greater Value if King is safe
+            if self.kingSafe:
+                print('King Safe')
+                hValue = hValue + 10
+                # Greater Value if Rook is safe
+                if self.rookSafe:
+                    print('Rook Safe')
+                    hValue = hValue + 10
+ 
+            print('Player1 Piece Coordinates\nKing: {}\nRook:{}\nPlayer2 Piece Coordinate\nKing: {}'.format(p1K, p1R, p2K))
+            print('Distance to Ally Rating: {}\nDistance from Enemy Rating: {}\nHeuristic Value: {}\n'.format(distToAlly, distToOpp, hValue))
+ 
+            return hValue
+ 
+        #############################################
+        # Checks to see if Objective 2 is complete. Objective 2 is that the opponent's
+        # King has an area of movement limited to only two spaces in one direction
+        # and up to 8 in the other direction.
+        #
+        # Assume king is safe, and rook is protected
+        #############################################
+        elif not self.objective2Complete:
+            hValue = 0
+            # If the enemy king isn't in the Rook's possible moves
+            if p2K not in posMoves('R', p1R):
+                # The greater the amount of space protected by the rook,
+                # the greater the heuristic value.
+                totTilesCovered = self.coveredArea_Obj2(p1R, p1K, p2K)
+                hValue = hValue + totTilesCovered
+                 
+                # Debug print statement to show tiles covered
+                if self.debug:
+                    print('Total Tiles Covered: {}'.format(totTilesCovered))
+ 
+                # The shorter the distance, the better
+                distToKing = 10 - distance(p2K, p1K)
+                hValue = hValue + distToKing
+ 
+                # Check for Opposition
+                if opposition(p1K, p2K):
+                    hValue = hValue + 5
+ 
+ 
+                # If Total TIles Covered is equal to 62, that means the enemy king only has 2 spaces left
+                if totTilesCovered == 62 and opposition(p1K,p2K):
+                    print("That's Checkmate")
+ 
+ 
+            print(hValue)
+            return hValue
+             
+ 
+        #############################################
+        # Checks to see if Objective 3 is complete. Objective 3 is checkmate, and
+        # the winning state of the game.
+        #############################################
+        elif not self.objective3Complete:
+            pass
+ 
+ 
+#############################################################################################
+#############################################################################################
+ 
+ #-DS
